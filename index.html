@@ -13,27 +13,15 @@
   <title>Document</title>
 </head>
 <body>
-  <!-- 
-    -инпут для поиска города + рядом селект для указания страны;
-    -температура как есть в кельвинах - main.temp;
-    -температура как ощущается в кельвинах - main.feels.like;
-    -атмосферное давление в гПа - main.grnd_level;
-    -влажность в % - main.humidity;
-    -видимость в метрах - visibility;
-    -скорость ветра м/сек - wind.speed;
-    -направление-сделать в виде стрелочки компаса градусы(метеорологические) - wind.deg;
-    -время восхода солнца - sys.sunrise;
-    -время заката - sys.sunset;
-    -на какое время расчитаны данные - dt;
-  -->
-
     <div class="container">
       <div class="search__location">
-        <i class="fa-solid fa-location-dot"></i>
-        <input class="search__location_input" type="text" name="city" id="city" placeholder="Укажите ваше местоположение">
-        <button class="search__location_btn">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
+        <input class="search__location_input" type="text" placeholder="Укажите ваше местоположение">
+        <div class="search__location-inner">
+          <i class="fa-solid fa-location-dot"></i>
+          <button class="search__location_btn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
       </div>
 
       <div class="time-data-calculation">
