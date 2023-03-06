@@ -75,13 +75,6 @@ function getCoordsCity(city) {
     .then(resp => resp.json())
     .then(data => {
       let {local_names: {ru, en}, name, lat, lon} = data[0];
-      if(ru) {
-        locInput.value = ru;
-      } else if(en) {
-        locInput.value = en;
-      } else {
-        locInput.value = name;
-      }
       getWeather(lat, lon);
     })
     .catch((error) => {
@@ -97,32 +90,56 @@ function getWeather(lat, lon) {
   fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=43bc780361de917fc7e7b8f889aee2ca&units=metric&lang=ru`)
     .then(resp => resp.json())
     .then(data => {
-      function setTime(data, timezone, fullDate) {
+      console.log(data);
+      locInput.value = data.name;
+      /* функция расчета местного времени, а также восхода и заката солнца относительно него*/
+      function getLocalTime(data, timezone, fullDate) {
         let date = new Date()
         function zeroBeforeDigit(number) {
           return number<10?`0${number}`:`${number}`
         }
         date.setTime(data * 1000)
-        let day = zeroBeforeDigit(date.getUTCDate());
-        let month = zeroBeforeDigit(date.getUTCMonth() + 1);
-        let year = date.getUTCFullYear();
+        
         let minutes = zeroBeforeDigit(date.getUTCMinutes());
         let hours = date.getUTCHours() + timezone / 3600;
         if (hours<0) {
           hours += 24;
+        } else if(hours>24) {
+          hours -= 24;
         }
         hours = zeroBeforeDigit(hours);
         
+        
+        
         if(fullDate) {
+          let day = zeroBeforeDigit(date.getUTCDate());
+          let month = zeroBeforeDigit(date.getUTCMonth() + 1);
+          let year = date.getUTCFullYear();
           return `${hours}:${minutes}, ${day}.${month}.${year}`;
         } else {
           return `${hours}:${minutes}`;
         }
       }
-      timeDataCalculation.textContent = setTime(data.dt, data.timezone, true);
-      sunrise.textContent = setTime(data.sys.sunrise, data.timezone);
-      sunset.textContent = setTime(data.sys.sunset, data.timezone)
+      /* вывод времени на которое произведены расчеты, времени восхода и заката солнца */
+      timeDataCalculation.textContent = getLocalTime(data.dt, data.timezone, true);
+      sunrise.textContent = getLocalTime(data.sys.sunrise, data.timezone);
+      sunset.textContent = getLocalTime(data.sys.sunset, data.timezone)
       
+      /* определение текущего времени суток */
+      if (data.dt>=data.sys.sunrise && data.dt<=data.sys.sunset) {
+        timesOfDay = 'day';
+        illustrationLand.style.filter = '';
+        illustrationClouds.style.filter = '';
+        illustrationClouds2.style.filter = '';
+
+      } else {
+        timesOfDay = 'night';
+        illustrationLand.style.filter = 'brightness(50%)';
+        illustrationClouds.style.filter = 'brightness(50%)';
+        illustrationClouds2.style.filter = 'brightness(50%)';
+      }
+
+      /* вывод метероологических данных */
       temperature.textContent = `${Math.round(data.main.temp)}°C`;
       feelsLike.textContent = `${Math.round(data.main.feels_like)}°C`;
       
@@ -146,13 +163,17 @@ function getWeather(lat, lon) {
         atmospherePressure.innerHTML = ` на уровне моря ${Math.round(data.main.pressure * 0.750062)}мм.рт.ст.`;
       }
       
+      /* отображение текущих погодных условий */
       weatherConditionAll.forEach(e => {
         e.style.display = 'none';
       });
       switch (data.weather[0].main) {
         case 'Clear':
-          weatherConditionSun.style.display = 'block';
-          weatherConditionMoon.style.display = 'block';
+          if (timesOfDay === 'day') {
+            weatherConditionSun.style.display = 'block';
+          } else {
+            weatherConditionMoon.style.display = 'block';
+          }
           break;
         case 'Clouds':
           switch (data.weather[0].id) {
